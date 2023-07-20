@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.socket.io/socket.io-3.0.0.js"></script>
+    <title>Video Call</title>
+</head>
+<body>
+    <video id="video" width="320" height="240" autoplay></video>
+    <canvas id="canvas" width="320" height="240"></canvas>
+</body>
+    <script>
+        const socket = io('ws://localhost:3000');
+
+        socket.on('message', text =>{
+            console.log(text);
+        })
+
+        socket.on('video', video =>{
+            // console.log(video);
+            let img = new Image;
+            img.src = video;
+            secoundVideo.getContext('2d').drawImage(img, 0, 0, secoundVideo.width, secoundVideo.height);
+        })
+
+        let video = document.querySelector("#video");
+        let secoundVideo = document.querySelector("#canvas");
+
+        document.addEventListener('DOMContentLoaded',async()=>{
+            let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            // console.log(stream);
+            video.srcObject = stream;
+        })
+            
+
+        setInterval(function(){
+            const canvas = document.createElement('canvas');
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            let image_data_url = canvas.toDataURL('image/jpeg');
+
+            // console.log(image_data_url);
+            socket.emit('video',image_data_url);
+        },0.1);
+
+    </script>
+</html>
